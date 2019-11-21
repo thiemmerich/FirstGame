@@ -1,0 +1,14 @@
+{
+  "name": "firstgame",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Thiago Emmerich",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^7.1.2"
+  }
+}
