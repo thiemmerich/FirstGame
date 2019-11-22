@@ -1,9 +1,9 @@
 class Beam extends Phaser.GameObjects.Sprite {
 
-    constructor(scene) {
+    constructor(scene, x, y) {
 
-        var x = scene.player.x;
-        var y = scene.player.y;
+        //var x = scene.player.x;
+        //var y = scene.player.y;
 
         super(scene, x, y, "beam");
         scene.add.existing(this);

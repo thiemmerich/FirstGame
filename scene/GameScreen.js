@@ -40,7 +40,7 @@ class Scene2 extends Phaser.Scene {
         gameObject.play("explode");
     }
 
-    pulsingShip(ship, scaleMin, scaleMax) {
+    /*pulsingShip(ship, scaleMin, scaleMax) {
         this.scale += (0.05 * this.multiplyer);
         ship.setScale(this.scale);
         if (this.scale >= scaleMax) {
@@ -49,7 +49,7 @@ class Scene2 extends Phaser.Scene {
         if (this.scale <= scaleMin) {
             this.multiplyer = 1;
         }
-    }
+    }*/
 
     /*
         SETTING THE PLAYER MOVES
@@ -76,7 +76,29 @@ class Scene2 extends Phaser.Scene {
         CREATING THE BEAM(PROJECTILE) OBJECT
     */
     shootBeam() {
-        var beam = new Beam(this);
+        var x = this.player.x;
+        var y = this.player.y;
+
+        if(this.multiplyer <= 1){
+            this.multiplyer = 1;
+            x = x + 6;
+        }
+        if(this.multiplyer == 2){
+            x = x + 9;
+        }
+        if(this.multiplyer == 3){
+            x = x + 12;
+        }
+        if(this.multiplyer == 4){
+            x = x + 15;
+        }
+        if(this.multiplyer == 5){
+            x = x + 18;
+        }
+
+        for(var k = 1; k <= this.multiplyer; k++) {
+            var beam = new Beam(this, x - (k * 6), y);
+        }
     }
 
     /*
@@ -84,6 +106,7 @@ class Scene2 extends Phaser.Scene {
     */
     pickPowerUp(player, powerUp) {
         powerUp.disableBody(true, true);
+        this.multiplyer += 1;
     }
 
     /*
@@ -93,6 +116,7 @@ class Scene2 extends Phaser.Scene {
         this.resetShipPos(enemy);
         player.x = config.width / 2 - 8;
         player.y = config.height - 64;
+        this.multiplyer -= 1;
     }
 
     /*

@@ -8,13 +8,13 @@ let win
 function createWindow () {
   // Criar uma janela de navegação.
   win = new BrowserWindow({
-    width: 640,
-    height: 480,
+    width: 590,
+    height: 730,
     webPreferences: {
       nodeIntegration: true
     }
   });
-  
+
   // and load the index.html of the app.
   win.loadFile('index.html')
 
