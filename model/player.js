@@ -1,4 +1,4 @@
-class Player extends Phaser.Physics.Sprite {
+/*class Player extends Phaser.Physics.Sprite {
 
     constructor(scene, x, y, life, shipName, shipAnim, velocity) {
         super(scene, x, y, shipName);
@@ -12,4 +12,4 @@ class Player extends Phaser.Physics.Sprite {
 
         this.setCollideWorldBounds(true);
     }
-}
+}*/
