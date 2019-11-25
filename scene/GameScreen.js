@@ -117,29 +117,21 @@ class GameScreen extends Phaser.Scene {
     hurtPlayer(player, enemy) {
         this.resetShipPos(enemy);
 
-        if(this.player.alpha < 1){
+        if (this.player.alpha < 1) {
             return;
         }
 
-        var explosion = new Explosion(this, player.x, player.y);
-        this.resetPlayer();
-        /*this.time.addEvent({
-            delay:1000,
-            callback: this.resetPlayer,
-            callbackScope: this,
-            loop: false
-        });*/
-        /*
-        this.player.life -= 200;
- 
-        if (player.life < 0) {
- 
+        this.life -= 200;
+
+        if (this.life < 0) {
+
             var explosion = new Explosion(this, player.x, player.y);
+            this.resetPlayer();
             player.x = config.width / 2 - 8;
             player.y = config.height - 64;
             this.multiplyer -= 1;
-            this.player.life = 500;
-        }*/
+            this.life = 500;
+        }
     }
 
     resetPlayer() {
@@ -155,7 +147,7 @@ class GameScreen extends Phaser.Scene {
             ease: 'Power1',
             duration: 1500,
             repeat: 0,
-            onComplete: function(){
+            onComplete: function () {
                 this.player.alpha = 1;
             },
             callbackScope: this
@@ -232,28 +224,14 @@ class GameScreen extends Phaser.Scene {
         */
 
         this.enemies = this.physics.add.group();
-
         this.ship1 = new Ship(this, config.width / 2 - 50, config.height / 2, 100, "ship1", "ship1_anim", 2);//this.add.sprite(config.width / 2 - 50, config.height / 2, "ship1");
         this.ship2 = new Ship(this, config.width / 2, config.height / 2, 150, "ship2", "ship2_anim", 3);//this.add.sprite(config.width / 2, config.height / 2, "ship2");
         this.ship3 = new Ship(this, config.width / 2 + 50, config.height / 2, 50, "ship3", "ship3_anim", 1);//this.add.sprite(config.width / 2 + 50, config.height / 2, "ship3");
 
-
-        //this.ship1.play("ship1_anim");
-        //this.ship2.play("ship2_anim");
-        //this.ship3.play("ship3_anim");
-
-        //this.ship1.setInteractive();
-        //this.ship2.setInteractive();
-        //this.ship3.setInteractive();
-
-        //this.enemies.add(this.ship1);
-        //this.enemies.add(this.ship2);
-        //this.enemies.add(this.ship3);
-
         /*
             WHEN WE CLICK ON THE ENEMY IT BE DESTROYED
          */
-        this.input.on('gameobjectdown', this.destroyShip, this);
+        //this.input.on('gameobjectdown', this.destroyShip, this);
 
         /*
             CREATING THE PLAYER SHIP AND ENABLING COLLIDE
@@ -262,6 +240,7 @@ class GameScreen extends Phaser.Scene {
         this.player = this.physics.add.sprite(config.width / 2 - 8, config.height - 64, "player");
         this.player.setCollideWorldBounds(true);
         this.player.play("thrust");
+        this.life = 500;
 
         /*
             CREATING THE KEYBOARD LISTENER
