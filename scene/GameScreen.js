@@ -28,8 +28,10 @@ class Scene2 extends Phaser.Scene {
     */
     newRandomShip(ship) {
         var newShip = Phaser.Math.Between(1, 3);
+        var newLife = Phaser.Math.Between(100, 300);
         ship.setTexture("ship" + newShip);
         ship.play("ship" + newShip + "_anim");
+        ship.life = newLife;
     }
 
     /*
@@ -79,24 +81,24 @@ class Scene2 extends Phaser.Scene {
         var x = this.player.x;
         var y = this.player.y;
 
-        if(this.multiplyer <= 1){
+        if (this.multiplyer <= 1) {
             this.multiplyer = 1;
             x = x + 6;
         }
-        if(this.multiplyer == 2){
+        if (this.multiplyer == 2) {
             x = x + 9;
         }
-        if(this.multiplyer == 3){
+        if (this.multiplyer == 3) {
             x = x + 12;
         }
-        if(this.multiplyer == 4){
+        if (this.multiplyer == 4) {
             x = x + 15;
         }
-        if(this.multiplyer == 5){
+        if (this.multiplyer == 5) {
             x = x + 18;
         }
 
-        for(var k = 1; k <= this.multiplyer; k++) {
+        for (var k = 1; k <= this.multiplyer; k++) {
             var beam = new Beam(this, x - (k * 6), y);
         }
     }
@@ -124,11 +126,16 @@ class Scene2 extends Phaser.Scene {
     */
     hitEnemy(projectile, enemy) {
         projectile.destroy();
-        this.destroyShip(enemy);
-        this.resetShipPos(enemy);
 
-        this.score += 15;
-        this.scoreLabel.setText("SCORE " + this.score);
+        enemy.life -= projectile.hit;
+        if (enemy.life < 0) {
+            this.destroyShip(enemy);
+            this.resetShipPos(enemy);
+
+            this.score += 15;
+            this.scoreLabel.setText("SCORE " + this.score);
+
+        }
     }
 
     /*
@@ -181,22 +188,25 @@ class Scene2 extends Phaser.Scene {
         /*
             CREATING THE ENEMIES SHIPS
         */
-        this.ship1 = this.add.sprite(config.width / 2 - 50, config.height / 2, "ship1");
-        this.ship2 = this.add.sprite(config.width / 2, config.height / 2, "ship2");
-        this.ship3 = this.add.sprite(config.width / 2 + 50, config.height / 2, "ship3");
 
-        this.ship1.play("ship1_anim");
-        this.ship2.play("ship2_anim");
-        this.ship3.play("ship3_anim");
+        this.enemies = this.physics.add.group();
+
+        this.ship1 = new Ship(this, config.width / 2 - 50, config.height / 2, 100, "ship1", "ship1_anim", 2);//this.add.sprite(config.width / 2 - 50, config.height / 2, "ship1");
+        this.ship2 = new Ship(this, config.width / 2, config.height / 2, 150, "ship2", "ship2_anim", 3);//this.add.sprite(config.width / 2, config.height / 2, "ship2");
+        this.ship3 = new Ship(this, config.width / 2 + 50, config.height / 2, 50, "ship3", "ship3_anim", 1);//this.add.sprite(config.width / 2 + 50, config.height / 2, "ship3");
+
+
+        //this.ship1.play("ship1_anim");
+        //this.ship2.play("ship2_anim");
+        //this.ship3.play("ship3_anim");
 
         //this.ship1.setInteractive();
         //this.ship2.setInteractive();
         //this.ship3.setInteractive();
 
-        this.enemies = this.physics.add.group();
-        this.enemies.add(this.ship1);
-        this.enemies.add(this.ship2);
-        this.enemies.add(this.ship3);
+        //this.enemies.add(this.ship1);
+        //this.enemies.add(this.ship2);
+        //this.enemies.add(this.ship3);
 
         /*
             WHEN WE CLICK ON THE ENEMY IT BE DESTROYED
