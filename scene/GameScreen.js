@@ -1,4 +1,4 @@
-class Scene2 extends Phaser.Scene {
+class GameScreen extends Phaser.Scene {
     constructor() {
         super("playGame");
     }
@@ -116,9 +116,50 @@ class Scene2 extends Phaser.Scene {
     */
     hurtPlayer(player, enemy) {
         this.resetShipPos(enemy);
-        player.x = config.width / 2 - 8;
-        player.y = config.height - 64;
+
+        if(this.player.alpha < 1){
+            return;
+        }
+
+        var explosion = new Explosion(this, player.x, player.y);
+        this.resetPlayer();
+        /*this.time.addEvent({
+            delay:1000,
+            callback: this.resetPlayer,
+            callbackScope: this,
+            loop: false
+        });*/
+        /*
+        this.player.life -= 200;
+ 
+        if (player.life < 0) {
+ 
+            var explosion = new Explosion(this, player.x, player.y);
+            player.x = config.width / 2 - 8;
+            player.y = config.height - 64;
+            this.multiplyer -= 1;
+            this.player.life = 500;
+        }*/
+    }
+
+    resetPlayer() {
+        this.player.x = config.width / 2 - 8;
+        this.player.y = config.height;
         this.multiplyer -= 1;
+
+        this.player.alpha = 0.5;
+
+        var tween = this.tweens.add({
+            targets: this.player,
+            y: config.height - 64,
+            ease: 'Power1',
+            duration: 1500,
+            repeat: 0,
+            onComplete: function(){
+                this.player.alpha = 1;
+            },
+            callbackScope: this
+        });
     }
 
     /*
@@ -129,6 +170,7 @@ class Scene2 extends Phaser.Scene {
 
         enemy.life -= projectile.hit;
         if (enemy.life < 0) {
+            var explosion = new Explosion(this, enemy.x, enemy.y);
             this.destroyShip(enemy);
             this.resetShipPos(enemy);
 
@@ -216,9 +258,10 @@ class Scene2 extends Phaser.Scene {
         /*
             CREATING THE PLAYER SHIP AND ENABLING COLLIDE
          */
+        //this.player = new Player(this, config.width / 2 - 8, config.height - 64, 500, "player", "thrust", 0);
         this.player = this.physics.add.sprite(config.width / 2 - 8, config.height - 64, "player");
-        this.player.play("thrust");
         this.player.setCollideWorldBounds(true);
+        this.player.play("thrust");
 
         /*
             CREATING THE KEYBOARD LISTENER
