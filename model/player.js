@@ -1,15 +1,15 @@
-/*class Player extends Phaser.Physics.Sprite {
+class Player extends Phaser.Physics.Arcade.Sprite {
 
-    constructor(scene, x, y, life, shipName, shipAnim, velocity) {
-        super(scene, x, y, shipName);
+    constructor(scene, x, y, shipName, shipAnim) {
+        
+        super(scene,x,y,shipName);
+
         scene.add.existing(this);
 
-        this.life = life;
+        this.life = 500;
 
         this.play(shipAnim);
         scene.physics.world.enableBody(this);
-        this.body.velocity.y = - velocity;
-
         this.setCollideWorldBounds(true);
     }
-}*/
+}

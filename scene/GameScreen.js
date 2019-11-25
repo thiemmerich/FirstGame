@@ -121,16 +121,16 @@ class GameScreen extends Phaser.Scene {
             return;
         }
 
-        this.life -= 200;
+        this.player.life -= 200;
 
-        if (this.life < 0) {
+        if (this.player.life < 0) {
 
             var explosion = new Explosion(this, player.x, player.y);
             this.resetPlayer();
             player.x = config.width / 2 - 8;
             player.y = config.height - 64;
             this.multiplyer -= 1;
-            this.life = 500;
+            this.player.life = 500;
         }
     }
 
@@ -236,11 +236,11 @@ class GameScreen extends Phaser.Scene {
         /*
             CREATING THE PLAYER SHIP AND ENABLING COLLIDE
          */
-        //this.player = new Player(this, config.width / 2 - 8, config.height - 64, 500, "player", "thrust", 0);
-        this.player = this.physics.add.sprite(config.width / 2 - 8, config.height - 64, "player");
-        this.player.setCollideWorldBounds(true);
-        this.player.play("thrust");
-        this.life = 500;
+        this.player = new Player(this, config.width / 2 - 8, config.height - 64, "player", "thrust");
+        //this.player = this.physics.add.sprite(config.width / 2 - 8, config.height - 64, "player");
+        //this.player.setCollideWorldBounds(true);
+        //this.player.play("thrust");
+        //this.life = 500;
 
         /*
             CREATING THE KEYBOARD LISTENER

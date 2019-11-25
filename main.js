@@ -21,6 +21,9 @@ function createWindow () {
   // Open the DevTools.
   win.webContents.openDevTools()
 
+  // Disable resizeable
+  win.setResizable(false)
+
   // Emitido quando a janela é fechada.
   win.on('closed', () => {
     // Elimina a referência do objeto da janela, geralmente você iria armazenar as janelas
