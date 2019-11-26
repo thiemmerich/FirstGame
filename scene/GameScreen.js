@@ -225,9 +225,12 @@ class GameScreen extends Phaser.Scene {
             CREATING THE ENEMIES SHIPS
         */
         this.enemies = this.physics.add.group();
-        this.ship1 = new Ship(this, config.width / 2 - 50, config.height / 2, 100, "ship1", "ship1_anim", 2);
-        this.ship2 = new Ship(this, config.width / 2, config.height / 2, 150, "ship2", "ship2_anim", 3);
-        this.ship3 = new Ship(this, config.width / 2 + 50, config.height / 2, 50, "ship3", "ship3_anim", 1);
+        this.enemies.add(new Ship(this, config.width / 2 - 50, config.height / 2, 100, "ship1", "ship1_anim", 2));
+        this.enemies.add(new Ship(this, config.width / 2, config.height / 2, 150, "ship2", "ship2_anim", 3));
+        this.enemies.add(new Ship(this, config.width / 2 + 50, config.height / 2, 50, "ship3", "ship3_anim", 1));
+        //this.ship1 = new Ship(this, config.width / 2 - 50, config.height / 2, 100, "ship1", "ship1_anim", 2);
+        //this.ship2 = new Ship(this, config.width / 2, config.height / 2, 150, "ship2", "ship2_anim", 3);
+        //this.ship3 = new Ship(this, config.width / 2 + 50, config.height / 2, 50, "ship3", "ship3_anim", 1);
 
         /*
             CREATING THE PLAYER SHIP AND ENABLING COLLIDE
@@ -282,19 +285,15 @@ class GameScreen extends Phaser.Scene {
     */
     update() {
 
-        this.moveShip(this.ship1, 1);
-        this.moveShip(this.ship2, 2);
-        this.moveShip(this.ship3, 3);
-
         this.background.tilePositionY -= 0.5;
 
         this.movePlayerManager();
         this.movePlayer2Manager();
 
-        /*if (Phaser.Input.Keyboard.JustDown(this.spaceBar)) {
-            this.shootBeam();
-        }*/
-
+        for(var l = 0; l < this.enemies.getChildren().length; l++){
+            this.moveShip(this.enemies.getChildren()[l], l + 1);
+        }
+        
         for (var j = 0; j < this.projectiles.getChildren().length; j++) {
             var beam = this.projectiles.getChildren()[j];
             beam.update();

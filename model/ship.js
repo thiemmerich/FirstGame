@@ -10,6 +10,6 @@ class Ship extends Phaser.GameObjects.Sprite {
         scene.physics.world.enableBody(this);
         this.body.velocity.y = - velocity;
 
-        scene.enemies.add(this);
+        //scene.enemies.add(this);
     }
 }
