@@ -42,17 +42,6 @@ class GameScreen extends Phaser.Scene {
         gameObject.play("explode");
     }
 
-    /*pulsingShip(ship, scaleMin, scaleMax) {
-        this.scale += (0.05 * this.multiplyer);
-        ship.setScale(this.scale);
-        if (this.scale >= scaleMax) {
-            this.multiplyer = -1;
-        }
-        if (this.scale <= scaleMin) {
-            this.multiplyer = 1;
-        }
-    }*/
-
     /*
         SETTING THE PLAYER MOVES
     */
@@ -72,34 +61,49 @@ class GameScreen extends Phaser.Scene {
         } else {
             this.player.setVelocityY(0);
         }
+
+        if (this.cursorKeys.space.isDown) {
+            if (this.player.timing == false) {
+                this.player.timing = true;
+                this.time.addEvent({
+                    delay: 100,
+                    callback: this.player.shootBeam,
+                    callbackScope: this.player,
+                    loop: false
+                });
+            }
+            //this.shootBeam();
+        }
     }
 
-    /*
-        CREATING THE BEAM(PROJECTILE) OBJECT
-    */
-    shootBeam() {
-        var x = this.player.x;
-        var y = this.player.y;
-
-        if (this.multiplyer <= 1) {
-            this.multiplyer = 1;
-            x = x + 6;
-        }
-        if (this.multiplyer == 2) {
-            x = x + 9;
-        }
-        if (this.multiplyer == 3) {
-            x = x + 12;
-        }
-        if (this.multiplyer == 4) {
-            x = x + 15;
-        }
-        if (this.multiplyer == 5) {
-            x = x + 18;
+    movePlayer2Manager() {
+        if (this.player2Cursor.A.isDown) {
+            this.player2.setVelocityX(-gameSettings.playerSpeed);
+        } else if (this.player2Cursor.D.isDown) {
+            this.player2.setVelocityX(gameSettings.playerSpeed);
+        } else {
+            this.player2.setVelocityX(0);
         }
 
-        for (var k = 1; k <= this.multiplyer; k++) {
-            var beam = new Beam(this, x - (k * 6), y);
+        if (this.player2Cursor.W.isDown) {
+            this.player2.setVelocityY(-gameSettings.playerSpeed);
+        } else if (this.player2Cursor.S.isDown) {
+            this.player2.setVelocityY(gameSettings.playerSpeed);
+        } else {
+            this.player2.setVelocityY(0);
+        }
+
+        if (this.ctrl.isDown) {
+            if (this.player2.timing == false) {
+                this.player2.timing = true;
+                this.time.addEvent({
+                    delay: 100,
+                    callback: this.player2.shootBeam,
+                    callbackScope: this.player2,
+                    loop: false
+                });
+            }
+            //this.shootBeam();
         }
     }
 
@@ -108,7 +112,7 @@ class GameScreen extends Phaser.Scene {
     */
     pickPowerUp(player, powerUp) {
         powerUp.disableBody(true, true);
-        this.multiplyer += 1;
+        player.multiplier += 1;
     }
 
     /*
@@ -117,38 +121,35 @@ class GameScreen extends Phaser.Scene {
     hurtPlayer(player, enemy) {
         this.resetShipPos(enemy);
 
-        if (this.player.alpha < 1) {
+        if (player.alpha < 1) {
             return;
         }
 
-        this.player.life -= 200;
+        player.life -= 200;
+        player.multiplier -= 1;
 
-        if (this.player.life < 0) {
+        if (player.life < 0) {
 
             var explosion = new Explosion(this, player.x, player.y);
-            this.resetPlayer();
-            player.x = config.width / 2 - 8;
-            player.y = config.height - 64;
-            this.multiplyer -= 1;
-            this.player.life = 500;
+            this.resetPlayer(player);
         }
     }
 
-    resetPlayer() {
-        this.player.x = config.width / 2 - 8;
-        this.player.y = config.height;
-        this.multiplyer -= 1;
+    resetPlayer(player) {
+        player.x = config.width / 2 - 8;
+        player.y = config.height;
 
-        this.player.alpha = 0.5;
+        player.alpha = 0.5;
 
         var tween = this.tweens.add({
-            targets: this.player,
+            targets: player,
             y: config.height - 64,
             ease: 'Power1',
             duration: 1500,
             repeat: 0,
             onComplete: function () {
-                this.player.alpha = 1;
+                player.alpha = 1;
+                player.life = 500;
             },
             callbackScope: this
         });
@@ -177,8 +178,9 @@ class GameScreen extends Phaser.Scene {
     */
     create() {
         this.scale = 1;
-        this.multiplyer = 1;
         this.score = 0;
+
+        this.cena = "GAMESCREEN";
 
         /*
             CREATING THE MAP AND SETTING THIS ORIGIN
@@ -222,35 +224,28 @@ class GameScreen extends Phaser.Scene {
         /*
             CREATING THE ENEMIES SHIPS
         */
-
         this.enemies = this.physics.add.group();
-        this.ship1 = new Ship(this, config.width / 2 - 50, config.height / 2, 100, "ship1", "ship1_anim", 2);//this.add.sprite(config.width / 2 - 50, config.height / 2, "ship1");
-        this.ship2 = new Ship(this, config.width / 2, config.height / 2, 150, "ship2", "ship2_anim", 3);//this.add.sprite(config.width / 2, config.height / 2, "ship2");
-        this.ship3 = new Ship(this, config.width / 2 + 50, config.height / 2, 50, "ship3", "ship3_anim", 1);//this.add.sprite(config.width / 2 + 50, config.height / 2, "ship3");
-
-        /*
-            WHEN WE CLICK ON THE ENEMY IT BE DESTROYED
-         */
-        //this.input.on('gameobjectdown', this.destroyShip, this);
+        this.ship1 = new Ship(this, config.width / 2 - 50, config.height / 2, 100, "ship1", "ship1_anim", 2);
+        this.ship2 = new Ship(this, config.width / 2, config.height / 2, 150, "ship2", "ship2_anim", 3);
+        this.ship3 = new Ship(this, config.width / 2 + 50, config.height / 2, 50, "ship3", "ship3_anim", 1);
 
         /*
             CREATING THE PLAYER SHIP AND ENABLING COLLIDE
          */
-        this.player = new Player(this, config.width / 2 - 8, config.height - 64, "player", "thrust");
-        //this.player = this.physics.add.sprite(config.width / 2 - 8, config.height - 64, "player");
-        //this.player.setCollideWorldBounds(true);
-        //this.player.play("thrust");
-        //this.life = 500;
+        this.player = new Player(this, config.width / 2 - 14, config.height - 64, "player", "thrust");
+        this.player2 = new Player(this, config.width / 2 + 14, config.height - 64, "player", "thrust");
 
         /*
             CREATING THE KEYBOARD LISTENER
          */
         this.cursorKeys = this.input.keyboard.createCursorKeys();
+        this.player2Cursor = this.input.keyboard.addKeys('W,S,A,D');
 
         /*
             CREATING THE SPACEBAR 
          */
         this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        this.ctrl = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL);
 
         /*
             CREATING THE LIST OF PROJECTILES TO ADD EACH ONE
@@ -268,11 +263,13 @@ class GameScreen extends Phaser.Scene {
             ENABLING THE PLAYER TO COLLIDE TO POWERUP AND PICK THIS (MAKE DESAPEAR)
          */
         this.physics.add.overlap(this.player, this.powerUps, this.pickPowerUp, null, this);
+        this.physics.add.overlap(this.player2, this.powerUps, this.pickPowerUp, null, this);
 
         /*
             ENABLING THE PLAYER TO COLLIDE TO A ENEMY AND MAKE DESAPEAR
          */
         this.physics.add.overlap(this.player, this.enemies, this.hurtPlayer, null, this);
+        this.physics.add.overlap(this.player2, this.enemies, this.hurtPlayer, null, this);
 
         /*
             ENABLING THE PROJECTILE TO COLLIDE TO A ENEMY AND DESTROY IT
@@ -285,17 +282,18 @@ class GameScreen extends Phaser.Scene {
     */
     update() {
 
-        this.moveShip(this.ship1, 2);
-        this.moveShip(this.ship2, 3);
-        this.moveShip(this.ship3, 1);
+        this.moveShip(this.ship1, 1);
+        this.moveShip(this.ship2, 2);
+        this.moveShip(this.ship3, 3);
 
         this.background.tilePositionY -= 0.5;
 
         this.movePlayerManager();
+        this.movePlayer2Manager();
 
-        if (Phaser.Input.Keyboard.JustDown(this.spaceBar)) {
+        /*if (Phaser.Input.Keyboard.JustDown(this.spaceBar)) {
             this.shootBeam();
-        }
+        }*/
 
         for (var j = 0; j < this.projectiles.getChildren().length; j++) {
             var beam = this.projectiles.getChildren()[j];
