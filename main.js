@@ -9,7 +9,7 @@ function createWindow () {
   // Criar uma janela de navegação.
   win = new BrowserWindow({
     width: 590,
-    height: 730,
+    height: 700,
     webPreferences: {
       nodeIntegration: true
     }
@@ -18,11 +18,16 @@ function createWindow () {
   // and load the index.html of the app.
   win.loadFile('index.html')
 
+  // Hidding menubar, it's will show the menu when user press 'alt' key
+  win.autoHideMenuBar = true;
+
+  win.setBackgroundColor('#000')
+
   // Open the DevTools.
   win.webContents.openDevTools()
 
   // Disable resizeable
-  win.setResizable(false)
+  win.resizable = false;
 
   // Emitido quando a janela é fechada.
   win.on('closed', () => {

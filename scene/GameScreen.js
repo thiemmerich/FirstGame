@@ -107,12 +107,33 @@ class GameScreen extends Phaser.Scene {
         }
     }
 
+    movePowerUp(powerUp){
+        if (powerUp.x >= config.width) {
+            powerUp.veloX = -100;
+        }
+        if (powerUp.x <= 10) {
+            powerUp.veloX = 100;
+        }
+        if (powerUp.y >= config.height) {
+            powerUp.veloY = -100;
+        }
+        if (powerUp.y <= 10) {
+            powerUp.veloY = 100;
+        }
+        powerUp.setVelocityX(powerUp.veloX);
+        powerUp.setVelocityY(powerUp.veloY);
+    }
+
     /*
         MAKE POWERUP DISAPEAR WHEN THE PLAYER HIT THE POWERUP
     */
     pickPowerUp(player, powerUp) {
         powerUp.disableBody(true, true);
-        player.multiplier += 1;
+        if (powerUp.type == "red") {
+            player.multiplier += 1;
+        } else {
+            player.life += 100;
+        }
     }
 
     /*
@@ -169,7 +190,22 @@ class GameScreen extends Phaser.Scene {
 
             this.score += 15;
             this.scoreLabel.setText("SCORE " + this.score);
+            this.kills += 1;
+        }
+    }
 
+    createPowerUp() {
+        //var powerUp = this.physics.add.sprite(16, 16, "power-up");
+        //var powerUp = new PowerUp(this,16, 16, "power-up");      
+
+        if (Math.random() > 0.5) {
+            var powerUp = new PowerUp(this, 16, 16, "power-up", "red", "red");
+            //powerUp.play("red");
+            //powerUp.type = "red";
+        } else {
+            var powerUp = new PowerUp(this, 16, 16, "power-up", "gray", "gray");
+            //powerUp.play("gray");
+            //powerUp.type = "gray";
         }
     }
 
@@ -179,7 +215,7 @@ class GameScreen extends Phaser.Scene {
     create() {
         this.scale = 1;
         this.score = 0;
-
+        this.kills = 0;
         this.cena = "GAMESCREEN";
 
         /*
@@ -202,24 +238,6 @@ class GameScreen extends Phaser.Scene {
          */
 
         this.powerUps = this.physics.add.group();
-
-        var maxObjects = 4;
-
-        for (var value = 0; value <= maxObjects; value++) {
-            var powerUp = this.physics.add.sprite(16, 16, "power-up");
-            this.powerUps.add(powerUp);
-            powerUp.setRandomPosition(0, 0, config.width, config.height);
-
-            if (Math.random() > 0.5) {
-                powerUp.play("red");
-            } else {
-                powerUp.play("gray");
-            }
-
-            powerUp.setVelocity(100, 100);
-            powerUp.setCollideWorldBounds(true);
-            powerUp.setBounce(1);
-        }
 
         /*
             CREATING THE ENEMIES SHIPS
@@ -290,13 +308,22 @@ class GameScreen extends Phaser.Scene {
         this.movePlayerManager();
         this.movePlayer2Manager();
 
-        for(var l = 0; l < this.enemies.getChildren().length; l++){
+        for (var l = 0; l < this.enemies.getChildren().length; l++) {
             this.moveShip(this.enemies.getChildren()[l], l + 1);
         }
-        
+
         for (var j = 0; j < this.projectiles.getChildren().length; j++) {
             var beam = this.projectiles.getChildren()[j];
             beam.update();
+        }
+
+        if (this.kills == 1) {
+            this.createPowerUp();
+            this.kills = 0;
+        }
+
+        for (var k = 0; k < this.powerUps.getChildren().length; k++) {
+            this.movePowerUp(this.powerUps.getChildren()[k]);
         }
     }
 
