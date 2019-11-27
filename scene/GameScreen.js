@@ -7,31 +7,45 @@ class GameScreen extends Phaser.Scene {
         MAKING THE ENEMIES SHIP MOVE DOWN
     */
     moveShip(ship, speed) {
+        var xSpeed = Phaser.Math.Between(-2,2);
         ship.y += speed;
+        ship.x += xSpeed;
+
         if (ship.y > config.height) {
-            this.resetShipPos(ship);
+            //this.resetShipPos(ship);
+            this.destroyShip(ship);
         }
+    }
+
+    moveBoss(ship) {
+        if (ship.x >= config.width) {
+            ship.bossPosX = -1;
+        }
+        if (ship.x <= 0) {
+            ship.bossPosX = 1;
+        }
+        if (ship.y >= config.height) {
+            ship.bossPosY = -1;
+        }
+        if (ship.y <= 20) {
+            ship.bossPosY = 1;
+        }
+        ship.x += ship.bossPosX;
+        ship.y += ship.bossPosY;
     }
 
     /*
         RESETING THE ENEMIE SHIP POSITION TO THE TOP OF THE MAP ON A RANDOM POSITION
     */
     resetShipPos(ship) {
-        this.newRandomShip(ship);
-        ship.y = 0;
-        var randomX = Phaser.Math.Between(0, config.width);
-        ship.x = randomX;
-    }
-
-    /*
-        SHOWING THE ENEMIE SHIP WITH A RANDOM SPRITE
-    */
-    newRandomShip(ship) {
-        var newShip = Phaser.Math.Between(1, 3);
         var newLife = Phaser.Math.Between(100, 300);
-        ship.setTexture("ship" + newShip);
-        ship.play("ship" + newShip + "_anim");
+        var randomX = Phaser.Math.Between(0, config.width);
+
+        ship.setTexture(ship.type);
+        ship.play(ship.type + "_anim");
         ship.life = newLife;
+        ship.y = 0;
+        ship.x = randomX;
     }
 
     /*
@@ -40,6 +54,7 @@ class GameScreen extends Phaser.Scene {
     destroyShip(gameObject) {
         gameObject.setTexture("explosion");
         gameObject.play("explode");
+        gameObject.destroy();
     }
 
     /*
@@ -107,17 +122,17 @@ class GameScreen extends Phaser.Scene {
         }
     }
 
-    movePowerUp(powerUp){
+    movePowerUp(powerUp) {
         if (powerUp.x >= config.width) {
             powerUp.veloX = -100;
         }
-        if (powerUp.x <= 10) {
+        if (powerUp.x <= 0) {
             powerUp.veloX = 100;
         }
         if (powerUp.y >= config.height) {
             powerUp.veloY = -100;
         }
-        if (powerUp.y <= 10) {
+        if (powerUp.y <= 20) {
             powerUp.veloY = 100;
         }
         powerUp.setVelocityX(powerUp.veloX);
@@ -156,6 +171,20 @@ class GameScreen extends Phaser.Scene {
         }
     }
 
+    hurtByBoss(player) {
+        if (player.alpha < 1) {
+            return;
+        }
+
+        player.life -= 200;
+        player.multiplier -= 1;
+
+        if (player.life < 0) {
+            var explosion = new Explosion(this, player.x, player.y);
+            this.resetPlayer(player);
+        }
+    }
+
     resetPlayer(player) {
         player.x = config.width / 2 - 8;
         player.y = config.height;
@@ -186,27 +215,34 @@ class GameScreen extends Phaser.Scene {
         if (enemy.life < 0) {
             var explosion = new Explosion(this, enemy.x, enemy.y);
             this.destroyShip(enemy);
-            this.resetShipPos(enemy);
+            //this.resetShipPos(enemy);
 
             this.score += 15;
-            this.scoreLabel.setText("SCORE " + this.score);
+            this.scoreLabel.setText("SCORE " + this.score + " WAVE " + this.wave);
             this.kills += 1;
         }
     }
 
     createPowerUp() {
-        //var powerUp = this.physics.add.sprite(16, 16, "power-up");
-        //var powerUp = new PowerUp(this,16, 16, "power-up");      
-
         if (Math.random() > 0.5) {
             var powerUp = new PowerUp(this, 16, 16, "power-up", "red", "red");
-            //powerUp.play("red");
-            //powerUp.type = "red";
         } else {
             var powerUp = new PowerUp(this, 16, 16, "power-up", "gray", "gray");
-            //powerUp.play("gray");
-            //powerUp.type = "gray";
         }
+    }
+
+    createEnemyShipWave(qtde, type, animation, life) {
+        for (var q = 0; q < qtde; q++) {
+            //var n = Phaser.Math.Between(1, 3);
+            var posX = Phaser.Math.Between(0, config.width);
+            this.enemies.add(new Ship(this, posX, 0, life, type, animation, type, 1));
+        }
+    }
+
+    createBoss(type, animation, life, scale) {
+        var boss = new Ship(this, config.width / 2, 0, life, type, animation, type, 1);
+        boss.scale += scale;
+        this.bosses.add(boss);
     }
 
     /*
@@ -216,7 +252,10 @@ class GameScreen extends Phaser.Scene {
         this.scale = 1;
         this.score = 0;
         this.kills = 0;
+        this.powerUpSpawn = Phaser.Math.Between(0, 10);
         this.cena = "GAMESCREEN";
+        this.count = 0;
+        this.wave = 1;
 
         /*
             CREATING THE MAP AND SETTING THIS ORIGIN
@@ -243,12 +282,7 @@ class GameScreen extends Phaser.Scene {
             CREATING THE ENEMIES SHIPS
         */
         this.enemies = this.physics.add.group();
-        this.enemies.add(new Ship(this, config.width / 2 - 50, config.height / 2, 100, "ship1", "ship1_anim", 2));
-        this.enemies.add(new Ship(this, config.width / 2, config.height / 2, 150, "ship2", "ship2_anim", 3));
-        this.enemies.add(new Ship(this, config.width / 2 + 50, config.height / 2, 50, "ship3", "ship3_anim", 1));
-        //this.ship1 = new Ship(this, config.width / 2 - 50, config.height / 2, 100, "ship1", "ship1_anim", 2);
-        //this.ship2 = new Ship(this, config.width / 2, config.height / 2, 150, "ship2", "ship2_anim", 3);
-        //this.ship3 = new Ship(this, config.width / 2 + 50, config.height / 2, 50, "ship3", "ship3_anim", 1);
+        this.bosses = this.physics.add.group();
 
         /*
             CREATING THE PLAYER SHIP AND ENABLING COLLIDE
@@ -266,7 +300,7 @@ class GameScreen extends Phaser.Scene {
             CREATING THE SPACEBAR 
          */
         this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        this.ctrl = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL);
+        this.ctrl = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
 
         /*
             CREATING THE LIST OF PROJECTILES TO ADD EACH ONE
@@ -291,11 +325,14 @@ class GameScreen extends Phaser.Scene {
          */
         this.physics.add.overlap(this.player, this.enemies, this.hurtPlayer, null, this);
         this.physics.add.overlap(this.player2, this.enemies, this.hurtPlayer, null, this);
+        this.physics.add.overlap(this.player, this.bosses, this.hurtByBoss, null, this);
+        this.physics.add.overlap(this.player2, this.bosses, this.hurtByBoss, null, this);
 
         /*
             ENABLING THE PROJECTILE TO COLLIDE TO A ENEMY AND DESTROY IT
          */
         this.physics.add.overlap(this.projectiles, this.enemies, this.hitEnemy, null, this);
+        this.physics.add.overlap(this.projectiles, this.bosses, this.hitEnemy, null, this);
     }
 
     /*
@@ -305,11 +342,42 @@ class GameScreen extends Phaser.Scene {
 
         this.background.tilePositionY -= 0.5;
 
+        if (this.count == 0) {
+            this.createEnemyShipWave(8, "ship1", "ship1_anim", 10);
+        }
+        if (this.count == 700) {
+            this.createEnemyShipWave(8, "ship2", "ship2_anim", 20);
+            this.wave = 2;
+        }
+        if (this.count == 1400) {
+            this.createEnemyShipWave(8, "ship3", "ship3_anim", 40);
+            this.wave = 3;
+        }
+        if (this.count == 2100) {
+            this.createEnemyShipWave(4, "ship1", "ship1_anim", 80);
+            this.createEnemyShipWave(4, "ship2", "ship2_anim", 80);
+            this.wave = 4;
+        }
+        if (this.count == 2800) {
+            this.createEnemyShipWave(4, "ship1", "ship1_anim", 160);
+            this.createEnemyShipWave(4, "ship2", "ship2_anim", 160);
+            this.createEnemyShipWave(4, "ship3", "ship3_anim", 160);
+            this.wave = 5;
+        }
+
+        if (this.count == 3500) {
+            this.createBoss("ship1", "ship1_anim", 1600, 3);
+        }
+
         this.movePlayerManager();
         this.movePlayer2Manager();
 
         for (var l = 0; l < this.enemies.getChildren().length; l++) {
-            this.moveShip(this.enemies.getChildren()[l], l + 1);
+            this.moveShip(this.enemies.getChildren()[l], 1);
+        }
+
+        for (var l = 0; l < this.bosses.getChildren().length; l++) {
+            this.moveBoss(this.bosses.getChildren()[l]);
         }
 
         for (var j = 0; j < this.projectiles.getChildren().length; j++) {
@@ -317,14 +385,17 @@ class GameScreen extends Phaser.Scene {
             beam.update();
         }
 
-        if (this.kills == 1) {
+        if (this.kills == this.powerUpSpawn) {
             this.createPowerUp();
-            this.kills = 0;
+            this.powerUpSpawn = Phaser.Math.Between(this.kills, (this.kills * Phaser.Math.Between(2, 5)));
         }
 
         for (var k = 0; k < this.powerUps.getChildren().length; k++) {
             this.movePowerUp(this.powerUps.getChildren()[k]);
         }
+
+        this.count++;
+        //console.log(this.count);
     }
 
 }
