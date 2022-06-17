@@ -9,7 +9,7 @@
   "author": "Thiago Emmerich",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^7.1.2"
+    "electron": "^15.5.5"
   },
   "dependencies": {
     "phaser": "^3.21.0"
